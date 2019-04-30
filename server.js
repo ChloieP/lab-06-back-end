@@ -13,12 +13,15 @@ app.get('/location', (request, response) => {
   try { 
     const locationData = request.query.data;
     const result = searchToLatLong(locationData);
+    const weatherData = request.query.data;
+    const weatherResult = searchWeather(weatherData);
     response.send(result);
+    response.send(weatherResult);
   }catch(e){ 
     console.error(e);
     response.status(500).send('Status 500: No city sent with request');
   }
-  
+
 });
 
 function searchToLatLong(query){
@@ -31,9 +34,22 @@ function searchToLatLong(query){
     latitude: geoData.results[0].geometry.location.lat,
     longitude: geoData.results[0].geometry.location.lng
   };
+      return location;
+ }     
 
-  return location;
+function searchWeather(query){
+  if(!query) throw new Error('No query sent');
+  const darkSkyData = require('./data/darksky.json');
+  console.log(darkSkyData);
+  const weather = {
+    search_query: query,
+    formatted_query: darkSkyData.results[0].currently.summary,
+    latitude: darkSkyData.results[0].latitude,
+    longitude: darkSkyData.results[0].longitude,
+  };
+      return weather;
 }
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
